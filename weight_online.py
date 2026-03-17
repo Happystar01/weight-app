@@ -15,12 +15,24 @@ st.set_page_config(
 )
 
 # ================== 强制背景颜色（必生效！） ==================
-st.markdown("""
+import random
+# 每日随机马卡龙色系
+colors = [
+    ("#f8eaf3", "#fddfeb", "#e5f3ff"),  # 粉紫系
+    ("#e5f0ff", "#d1e0ff", "#f0f8ff"),  # 蓝白系
+    ("#f9f3e6", "#f7ead0", "#fff8e8"),  # 奶油黄系
+    ("#e8f4ea", "#d4eed8", "#f0fcf4"),  # 薄荷绿系
+]
+# 按日期固定颜色（每天换一种，不随机跳）
+today = datetime.now().day
+chosen_colors = colors[today % len(colors)]
+
+st.markdown(f"""
 <style>
-.stApp {
-    background: linear-gradient(45deg, #fadadd, #fff5f8) !important;
+.stApp {{
+    background: linear-gradient(45deg, {chosen_colors[0]}, {chosen_colors[1]}, {chosen_colors[2]}) !important;
     background-attachment: fixed !important;
-}
+}}
 </style>
 """, unsafe_allow_html=True)
 
