@@ -1,4 +1,5 @@
 # 减脂体重记录 - 修复版（强制显示身高/目标体重 + 马卡龙背景）
+import requests  # 新增：用于同步腾讯文档
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -59,8 +60,37 @@ def load_data():
         return pd.read_csv(DATA_FILE)
     return pd.DataFrame(columns=["日期", "体重(kg)"])
 
+# 替换后的save_data函数（复制粘贴整段！）
 def save_data(df):
+    # 1. 先保存到Streamlit本地（防止同步失败）
     df.to_csv(DATA_FILE, index=False)
+    
+    # 2. 同步到腾讯文档（永久保存）
+    # ========== 重点：替换成你自己的腾讯文档链接 ==========
+    DOCS_URL = "https://docs.qq.com/sheet/DSWt3Y3hZbEtIUUJH?tab=BB08J2"  # 改成你复制的链接
+    # ====================================================
+    
+    try:
+        # 处理腾讯文档链接，提取表格ID
+        if "/sheet/" in DOCS_URL:
+            sheet_id = DOCS_URL.split("/sheet/")[1].split("?")[0]
+        else:
+            sheet_id = DOCS_URL.split("/s/")[1].split("?")[0]
+        
+        # 把体重数据转成CSV格式
+        csv_content = df.to_csv(index=False, encoding="utf-8")
+        
+        # 上传数据到腾讯文档
+        upload_url = f"https://docs.qq.com/sheet/upload?sheet_id={sheet_id}"
+        files = {"file": ("weight_data.csv", csv_content, "text/csv")}
+        response = requests.post(upload_url, files=files, timeout=10)
+        
+        if response.status_code == 200:
+            st.success("✅ 数据已同步到腾讯文档，永久保存！")
+        else:
+            st.warning("⚠️ 本地保存成功，腾讯文档同步失败（可忽略，手动复制数据）")
+    except Exception as e:
+        st.warning(f"⚠️ 本地保存成功，腾讯文档同步失败：{str(e)}（可忽略）")
 
 # ================== 加载数据 ==================
 config = load_config()
